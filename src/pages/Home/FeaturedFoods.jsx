@@ -62,7 +62,7 @@ const FeaturedFoods = () => {
 
                 <div className="flex items-center gap-3 mt-2">
                   <img
-                    src={food.donorImage}
+                    src={food.donatorImg}
                     alt="Donor"
                     className="w-10 h-10 rounded-full border"
                   />
