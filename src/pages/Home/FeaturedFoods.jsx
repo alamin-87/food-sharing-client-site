@@ -71,10 +71,6 @@ const FeaturedFoods = () => {
                     <p className="text-xs text-gray-500">{food.donatorEmail}</p>
                   </div>
                 </div>
-
-                <button className="btn btn-primary btn-sm mt-4 w-full">
-                  {food.buttonText || "Request Now"}
-                </button>
               </div>
             </motion.div>
           ))}

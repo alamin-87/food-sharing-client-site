@@ -1,0 +1,116 @@
+import React, { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext/AuthContext";
+import { toast } from "react-toastify";
+
+const AddFood = () => {
+    const { user } = useContext(AuthContext);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    const foodData = {
+      foodName: form.foodName.value,
+      foodQuantity: form.foodQuantity.value,
+      donatorName: form.donatorName.value,
+      donatorEmail: form.donatorEmail.value,
+      foodImage: form.foodImage.value,
+      pickupLocation: form.pickupLocation.value,
+      expireDate: form.expireDate.value,
+      additionalNotes: form.additionalNotes.value,
+      foodStatus: form.foodStatus.value,
+      userEmail: user.email,
+      userName: user.displayName,
+    };
+
+    const res = await fetch("http://localhost:3000/foods", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(foodData),
+    });
+
+    const data = await res.json();
+    if (data.insertedId) {
+      toast.success("Your garden tip was shared successfully!");
+      form.reset();
+    }
+  };
+
+  return (
+    <div className="max-w-xl mx-auto p-6 bg-white rounded shadow">
+      <h2 className="text-2xl font-bold mb-4">Submit Food Details</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+
+        <input
+          type="text"
+          name="foodName"
+          placeholder="Food Name"
+          className="input input-bordered w-full"
+        />
+
+        <input
+          type="text"
+          name="foodImage"
+          placeholder="Image URL"
+          className="input input-bordered w-full"
+        />
+
+        <input
+          type="text"
+          name="foodQuantity"
+          placeholder="Quantity"
+          className="input input-bordered w-full"
+        />
+
+        <input
+          type="text"
+          name="donatorName"
+          placeholder="Donator Name"
+          className="input input-bordered w-full"
+        />
+
+        <input
+          type="email"
+          name="donatorEmail"
+          placeholder="Donator Email"
+          className="input input-bordered w-full"
+        />
+
+        <input
+          type="text"
+          name="pickupLocation"
+          placeholder="Pickup Location"
+          className="input input-bordered w-full"
+        />
+
+        <input
+          type="datetime-local"
+          name="expireDate"
+          className="input input-bordered w-full"
+        />
+
+        <textarea
+          name="additionalNotes"
+          placeholder="Additional Notes"
+          className="textarea textarea-bordered w-full"
+        />
+
+        <select
+          name="foodStatus"
+          className="select select-bordered w-full"
+        >
+          <option value="available">Available</option>
+          <option value="expired">Expired</option>
+        </select>
+
+        <button type="submit" className="btn btn-primary w-full">
+          Submit
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default AddFood;

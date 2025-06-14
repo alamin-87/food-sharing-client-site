@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { useLoaderData, useNavigate } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import Countdown from "react-countdown";
 import { motion } from "framer-motion";
 
 const AvailableFood = () => {
   const foods = useLoaderData();
   const [sortOrder, setSortOrder] = useState("asc");
-  const navigate = useNavigate();
 
   const sortedFoods = [...foods].sort((a, b) => {
     const dateA = new Date(a.expireDate);
@@ -108,12 +107,14 @@ const AvailableFood = () => {
                 </div>
 
                 {/* View Details Button */}
-                <button
-                  onClick={() => navigate(`/food-details/${food._id}`)}
-                  className="btn btn-outline btn-sm btn-warning mt-4 w-full"
-                >
-                  View Details
-                </button>
+                <div className="card-actions justify-end flex items-center">
+                  <Link
+                    to={`/foodDetail/${food._id}`}
+                    className="btn btn-sm btn-outline btn-info"
+                  >
+                    👁️ See More
+                  </Link>
+                </div>
               </div>
             </motion.div>
           ))}
