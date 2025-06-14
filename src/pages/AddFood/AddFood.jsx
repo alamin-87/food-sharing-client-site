@@ -13,6 +13,7 @@ const AddFood = () => {
       foodName: form.foodName.value,
       foodQuantity: form.foodQuantity.value,
       donatorName: form.donatorName.value,
+      donatorImg: form.donatorImg.value,
       donatorEmail: form.donatorEmail.value,
       foodImage: form.foodImage.value,
       pickupLocation: form.pickupLocation.value,
@@ -75,6 +76,12 @@ const AddFood = () => {
           type="email"
           name="donatorEmail"
           placeholder="Donator Email"
+          className="input input-bordered w-full"
+        />
+        <input
+          type="text"
+          name="donatorImg"
+          placeholder="Donator Img URL"
           className="input input-bordered w-full"
         />
 

@@ -1,51 +1,47 @@
 import { useLoaderData, useNavigate } from "react-router";
 import Countdown from "react-countdown";
 import { ArrowLeft, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
-
-// Utility: Load and parse from localStorage safely
-const loadFoodsFromStorage = () => {
-  try {
-    const stored = localStorage.getItem("availableFoods");
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-};
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext/AuthContext";
 
 const MyRequestFood = () => {
   const navigate = useNavigate();
-  const loadedFood = useLoaderData(); // may be one object or array
-  const [foods, setFoods] = useState(loadFoodsFromStorage);
+  const { user } = useContext(AuthContext);
+  const [foods, setFoods] = useState([]);
 
-  // Normalize and merge loaded data on change
-  useEffect(() => {
-    if (!loadedFood) return;
-
-    const newFoods = Array.isArray(loadedFood) ? loadedFood : [loadedFood];
-
-    setFoods((prevFoods) => {
-      const merged = [
-        ...prevFoods,
-        ...newFoods.filter((nf) => !prevFoods.some((f) => f._id === nf._id)),
-      ];
-      return merged;
-    });
-  }, [loadedFood]);
-
-  // Save to localStorage whenever foods changes
-  useEffect(() => {
-    localStorage.setItem("availableFoods", JSON.stringify(foods));
-  }, [foods]);
-
-  // Delete a food from state and localStorage
-  const handleDelete = (id) => {
-    const updatedFoods = foods.filter((food) => food._id !== id);
-    setFoods(updatedFoods);
-    localStorage.setItem("availableFoods", JSON.stringify(updatedFoods));
+  // Load fresh data from backend
+  const loadRequestedFoods = () => {
+    fetch(`http://localhost:3000/foods?userEmail=${user?.email}`)
+      .then((res) => res.json())
+      .then((data) => setFoods(data))
+      .catch((err) => console.error("Fetch failed:", err));
   };
 
-  // Countdown renderer
+  useEffect(() => {
+    if (user?.email) {
+      loadRequestedFoods();
+    }
+  }, [user]);
+
+  const handleDelete = (id) => {
+    fetch(`http://localhost:3000/foods/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        requestDate: null,
+        foodStatus: "available",
+        userName: null,
+        userEmail: null,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.modifiedCount) {
+          loadRequestedFoods(); // Refresh list
+        }
+      });
+  };
+
   const renderer = ({ days, hours, minutes, seconds, completed }) => {
     if (completed) {
       return <span className="text-red-600 font-semibold">Expired</span>;
@@ -72,7 +68,7 @@ const MyRequestFood = () => {
             foodName,
             foodImage,
             foodQuantity,
-            donorImage,
+            donatorImg,
             donatorName,
             donatorEmail,
             userName,
@@ -104,7 +100,7 @@ const MyRequestFood = () => {
                 <button
                   onClick={() => handleDelete(_id)}
                   className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full shadow hover:bg-red-700 transition"
-                  title="Delete"
+                  title="Cancel Request"
                 >
                   <Trash2 size={20} />
                 </button>
@@ -144,13 +140,15 @@ const MyRequestFood = () => {
                   </p>
                   <p>
                     <strong>Request Date:</strong>{" "}
-                    {new Date(requestDate).toLocaleString()}
+                    {requestDate
+                      ? new Date(requestDate).toLocaleString()
+                      : "N/A"}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-4 mt-6">
                   <img
-                    src={donorImage}
+                    src={donatorImg}
                     alt="Donor"
                     className="w-12 h-12 rounded-full border"
                   />

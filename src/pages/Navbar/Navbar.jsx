@@ -41,7 +41,7 @@ const Navbar = () => {
           </li>
           <li>
             <NavLink
-              to="/manageMyFoods"
+              to="/myFood"
               className="text-base-content font-medium hover:text-orange-500 transition-colors"
             >
               Manage My Foods

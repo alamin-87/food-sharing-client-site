@@ -1,18 +1,24 @@
-import React from "react";
-import { Link, useLoaderData, useNavigate } from "react-router";
+import React, { useContext, useState } from "react";
+import { useLoaderData, useNavigate } from "react-router";
 import Countdown from "react-countdown";
 import { ArrowLeft } from "lucide-react";
+import Swal from "sweetalert2";
+import { AuthContext } from "../../context/AuthContext/AuthContext";
 
 const ViewDetail = () => {
+  const { user } = useContext(AuthContext);
   const food = useLoaderData();
   const navigate = useNavigate();
+
+  // Local state to reflect live changes
+  const [currentFood, setCurrentFood] = useState(food);
 
   const {
     _id,
     foodName,
     foodImage,
     foodQuantity,
-    donorImage,
+    donatorImg,
     donatorName,
     donatorEmail,
     userName,
@@ -22,7 +28,54 @@ const ViewDetail = () => {
     expireDate,
     additionalNotes,
     foodStatus,
-  } = food;
+  } = currentFood;
+
+  const handelUpdateFood = (id, isRequested) => {
+    const updatedFood = isRequested
+      ? {
+          requestDate: null,
+          foodStatus: "available",
+          userName: null,
+          userEmail: null,
+        }
+      : {
+          requestDate: new Date().toISOString(),
+          foodStatus: "requested",
+          userName: user?.displayName,
+          userEmail: user?.email,
+        };
+
+    fetch(`http://localhost:3000/foods/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedFood),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.modifiedCount) {
+          // Update local state
+          setCurrentFood((prev) => ({
+            ...prev,
+            ...updatedFood,
+          }));
+
+          Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: isRequested
+              ? "Request cancelled successfully!"
+              : "Request sent successfully!",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Update failed:", error);
+      });
+  };
 
   const renderer = ({ days, hours, minutes, seconds, completed }) => {
     if (completed) {
@@ -80,18 +133,19 @@ const ViewDetail = () => {
                 <span className="capitalize">{foodStatus}</span>
               </p>
               <p>
-                <strong>Requested By:</strong> {userName} ({userEmail})
+                <strong>Requested By:</strong>{" "}
+                {userName ? `${userName} (${userEmail})` : "Not yet requested"}
               </p>
               <p>
                 <strong>Request Date:</strong>{" "}
-                {new Date(requestDate).toLocaleString()}
+                {requestDate ? new Date(requestDate).toLocaleString() : "N/A"}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-4 mt-6">
             <img
-              src={donorImage}
+              src={donatorImg}
               alt="Donor"
               className="w-14 h-14 rounded-full border border-base-300"
             />
@@ -101,14 +155,16 @@ const ViewDetail = () => {
             </div>
           </div>
         </div>
+
         <div className="p-2">
-          <Link
-            to={`/myFoodRequest/${food._id}`}
-            // onClick={() => handleRequestClick(food._id)}
-            className="btn btn-primary btn-sm w-full"
+          <button
+            onClick={() => handelUpdateFood(_id, foodStatus === "requested")}
+            className={`btn btn-sm w-full ${
+              foodStatus === "requested" ? "btn-warning" : "btn-primary"
+            }`}
           >
-            {"Request Now"}
-          </Link>
+            {foodStatus === "requested" ? "Cancel Request" : "Request Now"}
+          </button>
         </div>
       </div>
     </section>

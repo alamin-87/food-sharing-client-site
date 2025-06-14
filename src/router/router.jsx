@@ -8,6 +8,8 @@ import PrivateRoute from "../routes/PrivateRoute";
 import ViewDetail from "../pages/ViewDetail/ViewDetail";
 import MyRequestFood from "../pages/MyRewuestFood/MyRequestFood";
 import AddFood from "../pages/AddFood/AddFood";
+import MyFood from "../pages/MyFood/MyFood";
+import UpdateFood from "../pages/UpdateFood/UpdateFood";
 
 const router = createBrowserRouter([
   {
@@ -18,16 +20,6 @@ const router = createBrowserRouter([
         index: true,
         Component: Home,
       },
-    //   {
-    //     path: "/foodDetail/:id",
-    //     Component: ViewDetail,
-    //     loader: ({ params }) =>
-    //       fetch(`http://localhost:3000/foods/${params.id}`),
-    //   },
-      //   {
-      //       path: 'jobApply/:id',
-      //       element: <PrivateRoute><JobApply></JobApply></PrivateRoute>
-      //   },
         {
           path: "availableFoods",
           element: (
@@ -59,14 +51,20 @@ const router = createBrowserRouter([
           element: <PrivateRoute><MyRequestFood></MyRequestFood></PrivateRoute>
       },
       {
-          path: 'addFood',
+          path: '/addFood',
           element: <PrivateRoute><AddFood></AddFood></PrivateRoute>
       },
-      // {
-      //     path: 'applications/:job_id',
-      //     element: <PrivateRoute><ViewApplications></ViewApplications></PrivateRoute>,
-      //     loader: ({params}) => fetch(`http://localhost:3000/applications/job/${params.job_id}`)
-      // },
+      {
+          path: '/myFood',
+          element: <PrivateRoute><MyFood></MyFood></PrivateRoute>,
+          loader: () => fetch("http://localhost:3000/foods"),
+      },
+      {
+          path: 'updateFood/:id',
+          element: <PrivateRoute><UpdateFood></UpdateFood></PrivateRoute>,
+          loader: ({ params }) =>
+          fetch(`http://localhost:3000/foods/${params.id}`)
+      },
       {
         path: "register",
         Component: SignUp,

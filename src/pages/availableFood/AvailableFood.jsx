@@ -94,7 +94,7 @@ const AvailableFood = () => {
                 {/* Donor Info */}
                 <div className="flex items-center gap-3 mt-3">
                   <img
-                    src={food.donorImage}
+                    src={food.donatorImg}
                     alt="Donor"
                     className="w-10 h-10 rounded-full border border-base-300"
                   />
