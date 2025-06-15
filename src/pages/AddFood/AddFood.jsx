@@ -3,7 +3,7 @@ import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { toast } from "react-toastify";
 
 const AddFood = () => {
-    const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +34,7 @@ const AddFood = () => {
 
     const data = await res.json();
     if (data.insertedId) {
-      toast.success("Your garden tip was shared successfully!");
+      toast.success("Food data added successfully!");
       form.reset();
     }
   };
@@ -43,12 +43,12 @@ const AddFood = () => {
     <div className="max-w-xl mx-auto p-6 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">Submit Food Details</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <input
           type="text"
           name="foodName"
           placeholder="Food Name"
           className="input input-bordered w-full"
+          required
         />
 
         <input
@@ -56,6 +56,7 @@ const AddFood = () => {
           name="foodImage"
           placeholder="Image URL"
           className="input input-bordered w-full"
+          required
         />
 
         <input
@@ -63,6 +64,7 @@ const AddFood = () => {
           name="foodQuantity"
           placeholder="Quantity"
           className="input input-bordered w-full"
+          required
         />
 
         <input
@@ -70,6 +72,7 @@ const AddFood = () => {
           name="donatorName"
           placeholder="Donator Name"
           className="input input-bordered w-full"
+          required
         />
 
         <input
@@ -77,7 +80,9 @@ const AddFood = () => {
           name="donatorEmail"
           placeholder="Donator Email"
           className="input input-bordered w-full"
+          required
         />
+
         <input
           type="text"
           name="donatorImg"
@@ -90,12 +95,14 @@ const AddFood = () => {
           name="pickupLocation"
           placeholder="Pickup Location"
           className="input input-bordered w-full"
+          required
         />
 
         <input
           type="datetime-local"
           name="expireDate"
           className="input input-bordered w-full"
+          required
         />
 
         <textarea
@@ -107,10 +114,28 @@ const AddFood = () => {
         <select
           name="foodStatus"
           className="select select-bordered w-full"
+          required
         >
           <option value="available">Available</option>
           <option value="expired">Expired</option>
         </select>
+
+        {/* Read-only user info */}
+        <input
+          type="text"
+          value={user?.displayName || ""}
+          readOnly
+          className="input input-bordered w-full bg-gray-100"
+          placeholder="User Name"
+        />
+
+        <input
+          type="email"
+          value={user?.email || ""}
+          readOnly
+          className="input input-bordered w-full bg-gray-100"
+          placeholder="User Email"
+        />
 
         <button type="submit" className="btn btn-primary w-full">
           Submit

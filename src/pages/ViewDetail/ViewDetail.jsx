@@ -9,8 +9,6 @@ const ViewDetail = () => {
   const { user } = useContext(AuthContext);
   const food = useLoaderData();
   const navigate = useNavigate();
-
-  // Local state to reflect live changes
   const [currentFood, setCurrentFood] = useState(food);
 
   const {
@@ -21,8 +19,8 @@ const ViewDetail = () => {
     donatorImg,
     donatorName,
     donatorEmail,
-    userName,
-    userEmail,
+    requestName,
+    requestEmail,
     requestDate,
     pickupLocation,
     expireDate,
@@ -30,69 +28,91 @@ const ViewDetail = () => {
     foodStatus,
   } = currentFood;
 
-  const handelUpdateFood = (id, isRequested) => {
+  const handleUpdateFood = async (id, isRequested) => {
     const updatedFood = isRequested
       ? {
           requestDate: null,
           foodStatus: "available",
-          userName: null,
-          userEmail: null,
+          requestName: null,
+          requestEmail: null,
         }
       : {
           requestDate: new Date().toISOString(),
           foodStatus: "requested",
-          userName: user?.displayName,
-          userEmail: user?.email,
+          requestName: user?.displayName,
+          requestEmail: user?.email,
         };
 
-    fetch(`http://localhost:3000/foods/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedFood),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.modifiedCount) {
-          // Update local state
-          setCurrentFood((prev) => ({
-            ...prev,
+    try {
+      // Update food in "foods" collection
+      const updateRes = await fetch(`http://localhost:3000/foods/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedFood),
+      });
+      const updateData = await updateRes.json();
+
+      if (updateData.modifiedCount) {
+        setCurrentFood((prev) => ({
+          ...prev,
+          ...updatedFood,
+        }));
+
+        if (!isRequested) {
+          // Add to requestedFoods collection with same _id
+          const requestedFood = {
+            ...food,
             ...updatedFood,
-          }));
+            _id: id, // important fix
+          };
+
+          await fetch("http://localhost:3000/requestedFoods", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestedFood),
+          });
 
           Swal.fire({
             position: "top-end",
             icon: "success",
-            title: isRequested
-              ? "Request cancelled successfully!"
-              : "Request sent successfully!",
+            title: "Request sent successfully!",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+
+          navigate(`/myFoodRequest`);
+        } else {
+          // Remove from requestedFoods collection
+          await fetch(`http://localhost:3000/requestedFoods/${id}`, {
+            method: "DELETE",
+          });
+
+          Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: "Request cancelled successfully!",
             showConfirmButton: false,
             timer: 1500,
           });
         }
-      })
-      .catch((error) => {
-        console.error("Update failed:", error);
-      });
-  };
-
-  const renderer = ({ days, hours, minutes, seconds, completed }) => {
-    if (completed) {
-      return <span className="text-red-600 font-semibold">Expired</span>;
-    } else {
-      return (
-        <span className="text-green-600 font-medium">
-          {days > 0 && `${days}d `}
-          {hours}h {minutes}m {seconds}s
-        </span>
-      );
+      }
+    } catch (error) {
+      console.error("Error in request/cancel:", error);
     }
   };
 
+  const renderer = ({ days, hours, minutes, seconds, completed }) =>
+    completed ? (
+      <span className="text-red-600 font-semibold">Expired</span>
+    ) : (
+      <span className="text-green-600 font-medium">
+        {days > 0 && `${days}d `} {hours}h {minutes}m {seconds}s
+      </span>
+    );
+
   return (
-    <section className="min-h-screen px-4 py-10 bg-base-200 text-base-content transition-colors duration-300">
-      <div className="max-w-4xl mx-auto bg-base-100 shadow-lg rounded-lg overflow-hidden border border-base-300">
+    <section className="min-h-screen px-4 py-10 bg-base-200 text-base-content">
+      <div className="max-w-4xl mx-auto bg-base-100 shadow-lg rounded-lg border">
         <div className="relative">
           <img
             src={foodImage}
@@ -101,7 +121,7 @@ const ViewDetail = () => {
           />
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-4 left-4 bg-white text-black dark:bg-gray-800 dark:text-white p-2 rounded-full shadow hover:scale-105 transition"
+            className="absolute top-4 left-4 bg-white text-black p-2 rounded-full shadow"
           >
             <ArrowLeft size={20} />
           </button>
@@ -109,24 +129,22 @@ const ViewDetail = () => {
 
         <div className="p-6 space-y-4">
           <h2 className="text-3xl font-bold text-orange-500">{foodName}</h2>
-
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <p>
                 <strong>Quantity:</strong> {foodQuantity}
               </p>
               <p>
-                <strong>Pickup Location:</strong> {pickupLocation}
+                <strong>Pickup:</strong> {pickupLocation}
               </p>
               <p>
-                <strong>Expires In:</strong>{" "}
+                <strong>Expires:</strong>{" "}
                 <Countdown date={new Date(expireDate)} renderer={renderer} />
               </p>
               <p>
-                <strong>Additional Notes:</strong> {additionalNotes}
+                <strong>Notes:</strong> {additionalNotes}
               </p>
             </div>
-
             <div>
               <p>
                 <strong>Status:</strong>{" "}
@@ -134,7 +152,9 @@ const ViewDetail = () => {
               </p>
               <p>
                 <strong>Requested By:</strong>{" "}
-                {userName ? `${userName} (${userEmail})` : "Not yet requested"}
+                {requestName
+                  ? `${requestName} (${requestEmail})`
+                  : "Not yet requested"}
               </p>
               <p>
                 <strong>Request Date:</strong>{" "}
@@ -147,7 +167,7 @@ const ViewDetail = () => {
             <img
               src={donatorImg}
               alt="Donor"
-              className="w-14 h-14 rounded-full border border-base-300"
+              className="w-14 h-14 rounded-full border"
             />
             <div>
               <p className="font-semibold">{donatorName}</p>
@@ -158,7 +178,7 @@ const ViewDetail = () => {
 
         <div className="p-2">
           <button
-            onClick={() => handelUpdateFood(_id, foodStatus === "requested")}
+            onClick={() => handleUpdateFood(_id, foodStatus === "requested")}
             className={`btn btn-sm w-full ${
               foodStatus === "requested" ? "btn-warning" : "btn-primary"
             }`}

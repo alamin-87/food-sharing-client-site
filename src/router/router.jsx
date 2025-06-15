@@ -38,17 +38,9 @@ const router = createBrowserRouter([
           ),
       },
       {
-        path: "/myFoodRequest/:id",
-        Component: MyRequestFood,
-        loader: ({ params }) =>
-          fetch(`http://localhost:3000/foods/${params.id}`).then((res) =>
-            res.json()
-          ),
-      },
-
-      {
           path:'/myFoodRequest',
-          element: <PrivateRoute><MyRequestFood></MyRequestFood></PrivateRoute>
+          element: <PrivateRoute><MyRequestFood></MyRequestFood></PrivateRoute>,
+          loader: () => fetch("http://localhost:3000/requestedFoods"),
       },
       {
           path: '/addFood',

@@ -6,46 +6,64 @@ import { motion } from "framer-motion";
 const AvailableFood = () => {
   const foods = useLoaderData();
   const [sortOrder, setSortOrder] = useState("asc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isThreeColumn, setIsThreeColumn] = useState(true);
 
-  const sortedFoods = [...foods].sort((a, b) => {
+  // Filter foods by search term
+  const filteredFoods = foods.filter((food) =>
+    food.foodName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Sort filtered foods
+  const sortedFoods = [...filteredFoods].sort((a, b) => {
     const dateA = new Date(a.expireDate);
     const dateB = new Date(b.expireDate);
     return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
   });
 
-  const renderer = ({ days, hours, minutes, seconds, completed }) => {
-    if (completed) {
-      return <span className="text-red-500 font-semibold">Expired</span>;
-    } else {
-      return (
-        <span className="text-green-600 font-medium">
-          {days > 0 && `${days}d `}
-          {hours}h {minutes}m {seconds}s
-        </span>
-      );
-    }
-  };
-
   return (
     <section className="py-10 px-4 min-h-screen transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
-        {/* Header + Sort Dropdown */}
-        <div className="mb-6 flex justify-between items-center flex-wrap gap-4">
-          <h2 className="text-3xl font-bold text-orange-600">
-            Available Foods
-          </h2>
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-            className="select select-bordered select-sm bg-white text-black transition-all"
-          >
-            <option value="asc">Sort by Expiry (Soonest First)</option>
-            <option value="desc">Sort by Expiry (Latest First)</option>
-          </select>
+        {/* Header */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h2 className="text-3xl font-bold text-orange-600">Available Foods</h2>
+
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* Search Input */}
+            <input
+              type="text"
+              placeholder="Search by food name"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input input-bordered input-sm bg-white text-black"
+            />
+
+            {/* Sort Dropdown */}
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="select select-bordered select-sm bg-white text-black"
+            >
+              <option value="asc">Expiry (Soonest First)</option>
+              <option value="desc">Expiry (Latest First)</option>
+            </select>
+
+            {/* Layout Toggle (Hidden on sm devices) */}
+            <button
+              onClick={() => setIsThreeColumn((prev) => !prev)}
+              className="btn btn-sm btn-outline hidden sm:inline-flex"
+            >
+              {isThreeColumn ? "2-Column View" : "3-Column View"}
+            </button>
+          </div>
         </div>
 
-        {/* Food Cards Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Grid Layout */}
+        <div
+          className={`grid gap-6 ${
+            isThreeColumn ? "md:grid-cols-2 lg:grid-cols-3" : "md:grid-cols-2"
+          }`}
+        >
           {sortedFoods.map((food, idx) => (
             <motion.div
               key={food._id}
@@ -80,8 +98,7 @@ const AvailableFood = () => {
                         </span>
                       ) : (
                         <span className="text-success font-medium">
-                          {days > 0 && `${days}d `}
-                          {hours}h {minutes}m {seconds}s
+                          {days > 0 && `${days}d `} {hours}h {minutes}m {seconds}s
                         </span>
                       )
                     }

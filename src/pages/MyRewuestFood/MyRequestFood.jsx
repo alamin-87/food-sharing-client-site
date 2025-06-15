@@ -1,57 +1,64 @@
 import { useLoaderData, useNavigate } from "react-router";
 import Countdown from "react-countdown";
 import { ArrowLeft, Trash2 } from "lucide-react";
-import { useEffect, useState, useContext } from "react";
-import { AuthContext } from "../../context/AuthContext/AuthContext";
+import { useState } from "react";
+import Swal from "sweetalert2";
+
+// Countdown renderer function
+const renderer = ({ days, hours, minutes, seconds, completed }) => {
+  if (completed) {
+    return <span className="text-red-600 font-semibold">Expired</span>;
+  } else {
+    return (
+      <span className="text-green-600 font-medium">
+        {days > 0 && `${days}d `}
+        {hours}h {minutes}m {seconds}s
+      </span>
+    );
+  }
+};
 
 const MyRequestFood = () => {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
-  const [foods, setFoods] = useState([]);
+  const initialFoods = useLoaderData() || [];
+  const [foods, setFoods] = useState(
+    Array.isArray(initialFoods) ? initialFoods : [initialFoods]
+  );
 
-  // Load fresh data from backend
-  const loadRequestedFoods = () => {
-    fetch(`http://localhost:3000/foods?userEmail=${user?.email}`)
-      .then((res) => res.json())
-      .then((data) => setFoods(data))
-      .catch((err) => console.error("Fetch failed:", err));
-  };
+  // Delete handler
+  const handleDelete = async (id) => {
+    const confirm = await Swal.fire({
+      title: "Are you sure?",
+      text: "This request will be permanently deleted!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+    });
 
-  useEffect(() => {
-    if (user?.email) {
-      loadRequestedFoods();
-    }
-  }, [user]);
+    if (confirm.isConfirmed) {
+      try {
+        const res = await fetch(`http://localhost:3000/requestedFoods/${id}`, {
+          method: "DELETE",
+        });
 
-  const handleDelete = (id) => {
-    fetch(`http://localhost:3000/foods/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        requestDate: null,
-        foodStatus: "available",
-        userName: null,
-        userEmail: null,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.modifiedCount) {
-          loadRequestedFoods(); // Refresh list
+        if (res.ok) {
+          const result = await res.json();
+          if (result.deletedCount > 0) {
+            setFoods((prevFoods) =>
+              prevFoods.filter((food) => food._id !== id)
+            );
+            Swal.fire(
+              "Deleted!",
+              "The food request has been removed.",
+              "success"
+            );
+          }
+        } else {
+          throw new Error("Failed to delete");
         }
-      });
-  };
-
-  const renderer = ({ days, hours, minutes, seconds, completed }) => {
-    if (completed) {
-      return <span className="text-red-600 font-semibold">Expired</span>;
-    } else {
-      return (
-        <span className="text-green-600 font-medium">
-          {days > 0 && `${days}d `}
-          {hours}h {minutes}m {seconds}s
-        </span>
-      );
+      } catch (error) {
+        Swal.fire("Error!", error.message, "error");
+      }
     }
   };
 
@@ -62,7 +69,9 @@ const MyRequestFood = () => {
   return (
     <section className="min-h-screen px-4 py-10 bg-base-200 text-base-content">
       <div className="max-w-6xl mx-auto grid gap-10 md:grid-cols-2">
-        {foods.map((food) => {
+        {foods.filter(Boolean).map((food) => {
+          if (!food?._id) return null;
+
           const {
             _id,
             foodName,
@@ -71,13 +80,13 @@ const MyRequestFood = () => {
             donatorImg,
             donatorName,
             donatorEmail,
-            userName,
-            userEmail,
             requestDate,
             pickupLocation,
             expireDate,
             additionalNotes,
             foodStatus,
+            requestName,
+            requestEmail,
           } = food;
 
           return (
@@ -97,10 +106,10 @@ const MyRequestFood = () => {
                 >
                   <ArrowLeft size={20} />
                 </button>
+
                 <button
                   onClick={() => handleDelete(_id)}
-                  className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full shadow hover:bg-red-700 transition"
-                  title="Cancel Request"
+                  className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-600 transition"
                 >
                   <Trash2 size={20} />
                 </button>
@@ -126,7 +135,8 @@ const MyRequestFood = () => {
                     />
                   </p>
                   <p>
-                    <strong>Additional Notes:</strong> {additionalNotes}
+                    <strong>Additional Notes:</strong>{" "}
+                    {additionalNotes || "N/A"}
                   </p>
                 </div>
 
@@ -136,7 +146,10 @@ const MyRequestFood = () => {
                     <span className="capitalize">{foodStatus}</span>
                   </p>
                   <p>
-                    <strong>Requested By:</strong> {userName} ({userEmail})
+                    <strong>Requested By:</strong>{" "}
+                    {requestName && requestEmail
+                      ? `${requestName} (${requestEmail})`
+                      : "N/A"}
                   </p>
                   <p>
                     <strong>Request Date:</strong>{" "}
