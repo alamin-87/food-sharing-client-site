@@ -1,14 +1,24 @@
 import React, { useContext } from "react";
-import { Link, NavLink } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import "../Navbar/Navbar.css";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import ThemeToggle from "../../DarkMode/ThemeToggle";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const { user, signOutUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleLogOut = () => {
-    signOutUser().catch(console.error);
+    signOutUser()
+      .then(() => {
+        toast.success("You have been logged out.");
+        navigate("/login"); // ✅ Redirect to login or home
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        toast.error("Failed to log out. Try again.");
+      });
   };
 
   const links = (

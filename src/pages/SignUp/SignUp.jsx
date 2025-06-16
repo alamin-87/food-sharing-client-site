@@ -1,4 +1,4 @@
-import React, { use } from "react";
+import React, { useContext } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { auth } from "../../firebase/firebase.init";
@@ -7,89 +7,101 @@ import Swal from "sweetalert2";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 
 const SignUp = () => {
-  const { createUser } = use(AuthContext);
+  const { createUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
   const location = useLocation();
 
-  const handelRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
     const { email, password, ...rest } = Object.fromEntries(formData.entries());
-    createUser(email, password)
-      .then((result) => {
-        console.log(result.user);
-        const userProfile = {
-          email,
-          ...rest,
-          creationTime: result.user?.metadata?.creationTime,
-          lastSignInTime: result.user?.metadata?.lastSignInTime,
-        };
-        // save user info in db
-        fetch(`http://localhost:3000/users`, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify(userProfile),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.insertedId) {
-              Swal.fire({
-                position: "top-end",
-                icon: "success",
-                title: "Your Profile has created",
-                showConfirmButton: false,
-                timer: 1500,
-              });
-            }
-          });
-        navigate("/login");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-  const handleGoogleLogin = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result.user;
 
-        const userProfile = {
-          name: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          creationTime: user.metadata?.creationTime,
-          lastSignInTime: user.metadata?.lastSignInTime,
-        };
-        // save user info in db
-        fetch(`http://localhost:3000/users`, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify(userProfile),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.insertedId) {
-              Swal.fire({
-                position: "top-end",
-                icon: "success",
-                title: "Your Profile has created",
-                showConfirmButton: false,
-                timer: 1500,
-              });
-            }
-          });
-        toast.success("Logged in with Google!");
-        navigate(location?.state || "/");
-      })
-      .catch((error) => {
-        toast.error(`Google login failed: ${error.message}`);
+    if (!email || !password) {
+      return toast.error("Email and password are required");
+    }
+
+    try {
+      const result = await createUser(email, password);
+      const user = result.user;
+      const token = await user.getIdToken();
+
+      const userProfile = {
+        email,
+        ...rest,
+        creationTime: user.metadata?.creationTime,
+        lastSignInTime: user.metadata?.lastSignInTime,
+      };
+
+      const res = await fetch(`http://localhost:3000/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(userProfile),
       });
+
+      const data = await res.json();
+      if (res.ok && data.insertedId) {
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Your Profile has been created",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        navigate("/login");
+      } else {
+        toast.error(data.message || "Signup failed");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Signup failed");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const token = await user.getIdToken();
+
+      const userProfile = {
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        creationTime: user.metadata?.creationTime,
+        lastSignInTime: user.metadata?.lastSignInTime,
+      };
+
+      const res = await fetch(`http://localhost:3000/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(userProfile),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.insertedId) {
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Your Profile has been created",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
+
+      toast.success("Logged in with Google!");
+      navigate(location?.state?.from || "/");
+    } catch (error) {
+      toast.error(`Google login failed: ${error.message}`);
+    }
   };
 
   return (
@@ -105,7 +117,7 @@ const SignUp = () => {
 
         <div className="card w-full max-w-sm bg-base-100 shadow-2xl lg:w-1/2">
           <div className="card-body">
-            <form onSubmit={handelRegister}>
+            <form onSubmit={handleRegister}>
               <label className="label">Name</label>
               <input
                 name="name"
@@ -113,9 +125,9 @@ const SignUp = () => {
                 className="input input-bordered w-full"
                 placeholder="Name"
               />
-              <label className="label">Photo</label>
+              <label className="label">Photo URL</label>
               <input
-                name="photo"
+                name="photoURL"
                 type="text"
                 className="input input-bordered w-full"
                 placeholder="Photo URL"
@@ -127,6 +139,7 @@ const SignUp = () => {
                 type="email"
                 className="input input-bordered w-full"
                 placeholder="Email"
+                required
               />
               <label className="label mt-2">Password</label>
               <input
@@ -134,8 +147,11 @@ const SignUp = () => {
                 type="password"
                 className="input input-bordered w-full"
                 placeholder="Password"
+                required
               />
-              <button className="btn btn-neutral mt-4 w-full">Register</button>
+              <button className="btn btn-neutral mt-4 w-full" type="submit">
+                Register
+              </button>
             </form>
 
             <p className="text-sm text-center mt-4">
@@ -148,6 +164,7 @@ const SignUp = () => {
               onClick={handleGoogleLogin}
               className="btn bg-white text-black border border-gray-300 mt-4 w-full"
             >
+              {/* Google SVG icon */}
               <svg
                 aria-label="Google logo"
                 width="16"

@@ -24,18 +24,29 @@ const AddFood = () => {
       userName: user.displayName,
     };
 
-    const res = await fetch("http://localhost:3000/foods", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(foodData),
-    });
+    try {
+      const token = await user.getIdToken(); // 🔐 get Firebase token
 
-    const data = await res.json();
-    if (data.insertedId) {
-      toast.success("Food data added successfully!");
-      form.reset();
+      const res = await fetch("http://localhost:3000/foods", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // 🔐 send token in header
+        },
+        body: JSON.stringify(foodData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.insertedId) {
+        toast.success("Food data added successfully!");
+        form.reset();
+      } else {
+        toast.error(data.message || "Failed to add food data");
+      }
+    } catch (error) {
+      console.error("Error submitting food:", error);
+      toast.error("Submission failed: " + error.message);
     }
   };
 
@@ -50,7 +61,6 @@ const AddFood = () => {
           className="input input-bordered w-full"
           required
         />
-
         <input
           type="text"
           name="foodImage"
@@ -58,7 +68,6 @@ const AddFood = () => {
           className="input input-bordered w-full"
           required
         />
-
         <input
           type="text"
           name="foodQuantity"
@@ -66,7 +75,6 @@ const AddFood = () => {
           className="input input-bordered w-full"
           required
         />
-
         <input
           type="text"
           name="donatorName"
@@ -74,7 +82,6 @@ const AddFood = () => {
           className="input input-bordered w-full"
           required
         />
-
         <input
           type="email"
           name="donatorEmail"
@@ -82,14 +89,12 @@ const AddFood = () => {
           className="input input-bordered w-full"
           required
         />
-
         <input
           type="text"
           name="donatorImg"
           placeholder="Donator Img URL"
           className="input input-bordered w-full"
         />
-
         <input
           type="text"
           name="pickupLocation"
@@ -97,20 +102,17 @@ const AddFood = () => {
           className="input input-bordered w-full"
           required
         />
-
         <input
           type="datetime-local"
           name="expireDate"
           className="input input-bordered w-full"
           required
         />
-
         <textarea
           name="additionalNotes"
           placeholder="Additional Notes"
           className="textarea textarea-bordered w-full"
         />
-
         <select
           name="foodStatus"
           className="select select-bordered w-full"
@@ -128,7 +130,6 @@ const AddFood = () => {
           className="input input-bordered w-full bg-gray-100"
           placeholder="User Name"
         />
-
         <input
           type="email"
           value={user?.email || ""}
