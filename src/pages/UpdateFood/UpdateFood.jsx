@@ -27,7 +27,7 @@ const UpdateFood = () => {
     const formData = new FormData(form);
     const updatedFood = Object.fromEntries(formData.entries());
 
-    fetch(`http://localhost:3000/foods/${_id}`, {
+    fetch(`https://server-site-alpha-umber.vercel.app/foods/${_id}`, {
       method: "PUT",
       headers: {
         "content-type": "application/json",

@@ -13,7 +13,7 @@ const Navbar = () => {
     signOutUser()
       .then(() => {
         toast.success("You have been logged out.");
-        navigate("/login"); // ✅ Redirect to login or home
+        navigate("/signIn"); // ✅ Redirect to login or home
       })
       .catch((error) => {
         console.error("Logout error:", error);

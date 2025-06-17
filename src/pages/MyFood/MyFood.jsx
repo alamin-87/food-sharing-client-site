@@ -47,7 +47,7 @@ const MyFood = () => {
 
     if (result.isConfirmed) {
       try {
-        const res = await fetch(`http://localhost:3000/foods/${id}`, {
+        const res = await fetch(`https://server-site-alpha-umber.vercel.app/foods/${id}`, {
           method: "DELETE",
         });
 

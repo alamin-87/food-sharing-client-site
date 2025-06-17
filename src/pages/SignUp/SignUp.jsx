@@ -34,7 +34,7 @@ const SignUp = () => {
         lastSignInTime: user.metadata?.lastSignInTime,
       };
 
-      const res = await fetch(`http://localhost:3000/users`, {
+      const res = await fetch(`https://server-site-alpha-umber.vercel.app/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -76,7 +76,7 @@ const SignUp = () => {
         lastSignInTime: user.metadata?.lastSignInTime,
       };
 
-      const res = await fetch(`http://localhost:3000/users`, {
+      const res = await fetch(`https://server-site-alpha-umber.vercel.app/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

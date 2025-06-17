@@ -27,7 +27,7 @@ const AddFood = () => {
     try {
       const token = await user.getIdToken(); // 🔐 get Firebase token
 
-      const res = await fetch("http://localhost:3000/foods", {
+      const res = await fetch("https://server-site-alpha-umber.vercel.app/foods", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

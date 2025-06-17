@@ -8,7 +8,7 @@ const HomeSlider = () => {
 
   // Fetch data from backend
   useEffect(() => {
-    fetch("http://localhost:3000/slider")
+    fetch("https://server-site-alpha-umber.vercel.app/slider")
       .then((res) => res.json())
       .then((data) => setSlides(data));
   }, []);

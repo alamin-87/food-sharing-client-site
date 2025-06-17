@@ -27,13 +27,13 @@ const router = createBrowserRouter([
             <AvailableFood></AvailableFood>
           </PrivateRoute>
         ),
-        loader: () => fetch("http://localhost:3000/foods"),
+        loader: () => fetch("https://server-site-alpha-umber.vercel.app/foods"),
       },
       {
         path: "/foodDetail/:id",
         Component: ViewDetail,
         loader: ({ params }) =>
-          fetch(`http://localhost:3000/foods/${params.id}`).then((res) =>
+          fetch(`https://server-site-alpha-umber.vercel.app/foods/${params.id}`).then((res) =>
             res.json()
           ),
       },
@@ -45,7 +45,7 @@ const router = createBrowserRouter([
             <MyRequestFood></MyRequestFood>
           </PrivateRoute>
         ),
-        loader: () => fetch("http://localhost:3000/requestedFoods"),
+        loader: () => fetch("https://server-site-alpha-umber.vercel.app/requestedFoods"),
       },
       {
         path: "/addFood",
@@ -63,7 +63,7 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
         loader: () =>
-          fetch("http://localhost:3000/foods"),
+          fetch("https://server-site-alpha-umber.vercel.app/foods"),
       },
       {
         path: "updateFood/:id",
@@ -73,7 +73,7 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
         loader: ({ params }) =>
-          fetch(`http://localhost:3000/foods/${params.id}`),
+          fetch(`https://server-site-alpha-umber.vercel.app/foods/${params.id}`),
       },
       {
         path: "register",

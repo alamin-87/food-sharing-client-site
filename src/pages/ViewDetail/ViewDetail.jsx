@@ -45,7 +45,7 @@ const ViewDetail = () => {
 
     try {
       // Update food in "foods" collection
-      const updateRes = await fetch(`http://localhost:3000/foods/${id}`, {
+      const updateRes = await fetch(`https://server-site-alpha-umber.vercel.app/foods/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedFood),
@@ -66,7 +66,7 @@ const ViewDetail = () => {
             _id: id, // important fix
           };
 
-          await fetch("http://localhost:3000/requestedFoods", {
+          await fetch("https://server-site-alpha-umber.vercel.app/requestedFoods", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestedFood),
@@ -83,7 +83,7 @@ const ViewDetail = () => {
           navigate(`/myFoodRequest`);
         } else {
           // Remove from requestedFoods collection
-          await fetch(`http://localhost:3000/requestedFoods/${id}`, {
+          await fetch(`https://server-site-alpha-umber.vercel.app/requestedFoods/${id}`, {
             method: "DELETE",
           });
 

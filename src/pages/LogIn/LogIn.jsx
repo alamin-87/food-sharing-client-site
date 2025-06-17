@@ -44,7 +44,7 @@ const LogIn = () => {
           lastSignInTime: result.user.metadata.lastSignInTime,
         };
 
-        fetch("http://localhost:3000/users", {
+        fetch("https://server-site-alpha-umber.vercel.app/users", {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -90,7 +90,7 @@ const LogIn = () => {
           lastSignInTime: user.metadata.lastSignInTime,
         };
 
-        fetch(`http://localhost:3000/users?email=${user.email}`, {
+        fetch(`https://server-site-alpha-umber.vercel.app/users?email=${user.email}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
           .then((res) => res.json())
@@ -99,7 +99,7 @@ const LogIn = () => {
               toast.info("Welcome back!");
               navigate(location?.state || "/");
             } else {
-              const postRes = await fetch("http://localhost:3000/users", {
+              const postRes = await fetch("https://server-site-alpha-umber.vercel.app/users", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",

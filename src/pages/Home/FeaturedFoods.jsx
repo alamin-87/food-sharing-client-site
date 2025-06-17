@@ -7,7 +7,7 @@ const FeaturedFoods = () => {
   const [foods, setFoods] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/foods")
+    fetch("https://server-site-alpha-umber.vercel.app/foods")
       .then((res) => res.json())
       .then((data) => setFoods(data.slice(0, 6)))
       .catch((err) => console.error("Fetch error:", err));
