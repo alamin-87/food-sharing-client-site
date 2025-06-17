@@ -20,15 +20,15 @@ const router = createBrowserRouter([
         index: true,
         Component: Home,
       },
-        {
-          path: "availableFoods",
-          element: (
-            <PrivateRoute>
-              <AvailableFood></AvailableFood>
-            </PrivateRoute>
-          ),
-          loader: () => fetch("http://localhost:3000/foods"),
-        },
+      {
+        path: "availableFoods",
+        element: (
+          <PrivateRoute>
+            <AvailableFood></AvailableFood>
+          </PrivateRoute>
+        ),
+        loader: () => fetch("http://localhost:3000/foods"),
+      },
       {
         path: "/foodDetail/:id",
         Component: ViewDetail,
@@ -39,24 +39,41 @@ const router = createBrowserRouter([
       },
 
       {
-          path:'/myFoodRequest',
-          element: <PrivateRoute><MyRequestFood></MyRequestFood></PrivateRoute>,
-          loader: () => fetch("http://localhost:3000/requestedFoods"),
+        path: "/myFoodRequest",
+        element: (
+          <PrivateRoute>
+            <MyRequestFood></MyRequestFood>
+          </PrivateRoute>
+        ),
+        loader: () => fetch("http://localhost:3000/requestedFoods"),
       },
       {
-          path: '/addFood',
-          element: <PrivateRoute><AddFood></AddFood></PrivateRoute>
+        path: "/addFood",
+        element: (
+          <PrivateRoute>
+            <AddFood></AddFood>
+          </PrivateRoute>
+        ),
       },
       {
-          path: '/myFood',
-          element: <PrivateRoute><MyFood></MyFood></PrivateRoute>,
-          loader: () => fetch("http://localhost:3000/foods"),
+        path: "/myFood",
+        element: (
+          <PrivateRoute>
+            <MyFood></MyFood>
+          </PrivateRoute>
+        ),
+        loader: () =>
+          fetch("http://localhost:3000/foods"),
       },
       {
-          path: 'updateFood/:id',
-          element: <PrivateRoute><UpdateFood></UpdateFood></PrivateRoute>,
-          loader: ({ params }) =>
-          fetch(`http://localhost:3000/foods/${params.id}`)
+        path: "updateFood/:id",
+        element: (
+          <PrivateRoute>
+            <UpdateFood></UpdateFood>
+          </PrivateRoute>
+        ),
+        loader: ({ params }) =>
+          fetch(`http://localhost:3000/foods/${params.id}`),
       },
       {
         path: "register",
