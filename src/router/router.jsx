@@ -1,7 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import RootLayout from "../layouts/RootLayout";
 import Home from "../pages/Home/Home";
-import LogIn from "../pages/Login/Login";
 import SignUp from "../pages/SignUp/SignUp";
 import AvailableFood from "../pages/availableFood/AvailableFood";
 import PrivateRoute from "../routes/PrivateRoute";
@@ -10,6 +9,7 @@ import MyRequestFood from "../pages/MyRewuestFood/MyRequestFood";
 import AddFood from "../pages/AddFood/AddFood";
 import MyFood from "../pages/MyFood/MyFood";
 import UpdateFood from "../pages/UpdateFood/UpdateFood";
+import LogIn from "../pages/LogIn/LogIn";
 
 const router = createBrowserRouter([
   {
