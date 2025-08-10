@@ -69,7 +69,6 @@ const Navbar = () => {
       )}
     </>
   );
-
   return (
     <div className="navbar bg-base-100 text-base-content px-4 sticky top-0 z-50 shadow-md">
       {/* Mobile Menu */}
@@ -169,5 +168,4 @@ const Navbar = () => {
     </div>
   );
 };
-
 export default Navbar;
